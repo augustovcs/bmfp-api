@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>BmFP_API</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Middleware\" />
+      <Folder Include="Models\" />
+      <Folder Include="Services\" />
+      <Folder Include="Utils\" />
+    </ItemGroup>
+
+</Project>
