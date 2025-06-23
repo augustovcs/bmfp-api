@@ -8,11 +8,14 @@ def clinical_ecg_analysis(record_path):
     fs = record.fs
     ecg_raw = record.p_signal[:, 0]  # Use first channel
 
+    segment_length = 60 * fs  # 60 seconds in samples
+    ecg_raw = ecg_raw[:segment_length]  # Limit to the first segment
+
     # Clean ECG signal
     ecg_cleaned = nk.ecg_clean(ecg_raw, sampling_rate=fs, method="neurokit")
     
     # Detect R-peaks
-    peaks, info = nk.ecg_peaks(ecg_cleaned, method="christov", show=False)
+    _, info = nk.ecg_peaks(ecg_cleaned, method="neurokit", show=False, sampling_rate=fs)
 
     if len(info["ECG_R_Peaks"]) < 2:
         return {"error": "Insufficient R-peaks detected"}
@@ -52,36 +55,31 @@ def clinical_ecg_analysis(record_path):
                 qrs_durations_ms.append(qrs_duration)
                 valid_qs_pairs += 1
 
-    # Segment processing
-    segment_length = 60 * fs
-    results = []
     
-    for i in range(0, len(ecg_cleaned), segment_length):
-        segment_end = min(i + segment_length, len(ecg_cleaned))
-        segment_duration = (segment_end - i) / fs
+
+    segment_duration = len(ecg_cleaned) / fs
+    segment_result = {
+        "segment_start": 0,
+        "segment_end": segment_duration,
+        "segment_duration": segment_duration,
+        "mean_hr": round(mean_hr, 2),
+        "rr_interval_mean": round(np.mean(rr_intervals), 3),
+        "valid_qs_pairs": valid_qs_pairs
+    }
         
-        segment_result = {
-            "segment_start": i / fs,
-            "segment_end": segment_end / fs,
-            "segment_duration": segment_duration,
-            "mean_hr": round(mean_hr, 2),
-            "rr_interval_mean": round(np.mean(rr_intervals), 3),
-            "valid_qs_pairs": valid_qs_pairs
-        }
-        
-        if qrs_durations_ms:
-            segment_result.update({
-                "qrs_duration_mean": round(np.mean(qrs_durations_ms), 2),
-                "qrs_duration_std": round(np.std(qrs_durations_ms), 2),
-                "qrs_duration_range": [
-                    round(min(qrs_durations_ms), 2),
-                    round(max(qrs_durations_ms), 2)
-                ]
-            })
-        else:
-            segment_result["qrs_duration"] = "Not measurable"
-        
-        results.append(segment_result)
+    if qrs_durations_ms:
+        segment_result.update({
+            "qrs_duration_mean": round(np.mean(qrs_durations_ms), 2),
+            "qrs_duration_std": round(np.std(qrs_durations_ms), 2),
+            "qrs_duration_range": [
+                round(min(qrs_durations_ms), 2),
+                round(max(qrs_durations_ms), 2)
+            ]
+        })
+    else:
+        segment_result["qrs_duration"] = "Not measurable"
+    
+    results = [segment_result]
 
     return {
         "overall_analysis": {
