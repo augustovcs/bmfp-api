@@ -2,8 +2,8 @@
 
 public class SignalUploadDTO
 {
-    public IFormFile File { get; set; }
-    public string SignalType { get; set; }
-    public double SampleRate { get; set; }
+    public IFormFile FileDAT { get; set; } = null!;
+    public IFormFile FileHEA { get; set; } = null!;
+  
     
 }

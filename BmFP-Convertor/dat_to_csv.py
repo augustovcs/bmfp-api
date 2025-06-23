@@ -1,7 +1,7 @@
 import pandas as pd
 import wfdb
 
-def convert_dat_to_csv(dat_file, csv_file):
+def convert_dat_to_csv(dat_file, csv_file=None):
 
     record = wfdb.rdrecord(dat_file)
 
@@ -11,6 +11,7 @@ def convert_dat_to_csv(dat_file, csv_file):
     df = pd.DataFrame(record.p_signal, columns=record.sig_name)
 
     df.insert(0, 'Time (s)', time)
+    csv_file = f"{dat_file}.csv"
     df.to_csv(csv_file, index=False)
 
 
