@@ -47,8 +47,15 @@ def clinical_ecg_analysis(record_path):
             arrhythmia_detected = False
     
     # Check for bradycardia
+    low_bradycardia = "Low level bradycardia"
+    mid_bradycardia = "Mid level bradycardia"
+    high_bradycardia = "High level bradycardia"
     if mean_hr < 60:
-        bradycardia = True
+        bradycardia = low_bradycardia
+    elif 42 <= mean_hr < 50:
+        bradycardia = mid_bradycardia
+    elif mean_hr < 42:
+        bradycardia = high_bradycardia
     else:
         bradycardia = False
 
@@ -100,13 +107,13 @@ def clinical_ecg_analysis(record_path):
     else:
         segment_result["qrs_duration"] = "Not measurable"
     
-    
-    results = [segment_result]
+
+    #results = [segment_result]
 
     return {
         "overall_analysis": {
             "total_beats": len(info["ECG_R_Peaks"]),
-            "total_valid_qs_pairs": valid_qs_pairs
+            #"total_valid_qs_pairs": valid_qs_pairs
         },
-        "segments": results
+        "segments": segment_result
     }
