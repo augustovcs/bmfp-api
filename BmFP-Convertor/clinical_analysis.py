@@ -36,6 +36,22 @@ def clinical_ecg_analysis(record_path):
     except Exception as e:
         return {"error": f"Delineation failed: {str(e)}"}
 
+    # Check for arrhythmia
+    if len(rr_intervals) < 2:
+        return {"error": "Insufficient RR intervals for arrhythmia detection"}
+    else:
+        rr_std = np.std(rr_intervals)
+        if rr_std > 0.1:
+            arrhythmia_detected = True
+        else:
+            arrhythmia_detected = False
+    
+    # Check for bradycardia
+    if mean_hr < 60:
+        bradycardia = True
+    else:
+        bradycardia = False
+
     # QRS duration calculation
     qrs_durations_ms = []
     valid_qs_pairs = 0
@@ -59,14 +75,19 @@ def clinical_ecg_analysis(record_path):
 
     segment_duration = len(ecg_cleaned) / fs
     segment_result = {
+        
         "segment_start": 0,
         "segment_end": segment_duration,
         "segment_duration": segment_duration,
         "mean_hr": round(mean_hr, 2),
         "rr_interval_mean": round(np.mean(rr_intervals), 3),
-        "valid_qs_pairs": valid_qs_pairs
+        "valid_qs_pairs": valid_qs_pairs,
+        "arrhythmia_detected": arrhythmia_detected,
+        "bradycardia": bradycardia,
     }
-        
+
+    # Implementing QRS duration statistics
+
     if qrs_durations_ms:
         segment_result.update({
             "qrs_duration_mean": round(np.mean(qrs_durations_ms), 2),
@@ -78,6 +99,7 @@ def clinical_ecg_analysis(record_path):
         })
     else:
         segment_result["qrs_duration"] = "Not measurable"
+    
     
     results = [segment_result]
 

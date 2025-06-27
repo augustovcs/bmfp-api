@@ -18,6 +18,4 @@ public class SignalController : ControllerBase
         return Ok(result);
     }
 
-    
-    
 }
